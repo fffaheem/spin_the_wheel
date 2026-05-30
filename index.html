@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Premium Spin Wheel</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --border: #e2e8f0;
+            --wheel-border: #cbd5e1;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #818cf8;
+            --primary-hover: #6366f1;
+            --border: #334155;
+            --wheel-border: #475569;
+            --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            gap: 30px;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .container { flex-direction: column; align-items: center; }
+            body { padding: 10px; }
+        }
+
+        .wheel-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 1;
+            margin-bottom: 20px;
+            filter: drop-shadow(var(--shadow));
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 8px solid var(--wheel-border);
+            transition: border-color 0.3s;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            clip-path: polygon(50% 100%, 0 0, 100% 0);
+            z-index: 10;
+        }
+
+        .controls-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .card {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        h2 { font-size: 1.2rem; margin-bottom: 10px; color: var(--text); }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: inherit;
+            resize: none;
+            transition: all 0.3s;
+        }
+        
+        textarea:focus { outline: none; border-color: var(--primary); }
+
+        .setting-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        input[type="range"] {
+            width: 60%;
+            accent-color: var(--primary);
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            width: 100%;
+        }
+
+        button:active { transform: scale(0.97); }
+        button:hover { background: var(--primary-hover); }
+        button:disabled { background: var(--text-muted); cursor: not-allowed; }
+
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .icon-btn {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .icon-btn:hover { background: var(--border); }
+
+        #result-display {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            min-height: 40px;
+            margin: 10px 0;
+            color: var(--primary);
+        }
+
+        .history-list {
+            list-style: none;
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .history-list li {
+            padding: 5px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--border);
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px; width: 14px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(20px); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="wheel-section">
+        <div class="header-controls">
+            <h1 style="font-size: 1.5rem;">Spin & Win</h1>
+            <button class="icon-btn" id="theme-toggle" title="Toggle Theme">🌓</button>
+        </div>
+        
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <canvas id="wheel" width="600" height="600"></canvas>
+        </div>
+        
+        <div id="result-display">Ready to spin!</div>
+        
+        <button id="spin-btn">SPIN THE WHEEL</button>
+    </div>
+
+    <div class="controls-section">
+        <div class="card">
+            <h2>Items (One per line)</h2>
+            <textarea id="items-input">Prize 1
+Prize 2
+Try Again
+Jackpot!
+Bonus Spin
+Lose Turn</textarea>
+        </div>
+
+        <div class="card">
+            <h2>Settings</h2>
+            <div class="setting-group">
+                <label>Speed (Power)</label>
+                <input type="range" id="power-slider" min="0.1" max="1" step="0.1" value="0.5">
+            </div>
+            <div class="setting-group">
+                <label>Duration (Friction)</label>
+                <input type="range" id="friction-slider" min="0.980" max="0.998" step="0.001" value="0.992">
+            </div>
+            <div class="setting-group">
+                <label>Sound Effects</label>
+                <label class="switch">
+                    <input type="checkbox" id="sound-toggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-group">
+                <label>Keep Results History</label>
+                <label class="switch">
+                    <input type="checkbox" id="history-toggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="setting-group">
+                <h2>Results History</h2>
+                <button class="icon-btn" id="clear-history" style="width:30px;height:30px;font-size:0.8rem;" title="Clear">🗑️</button>
+            </div>
+            <ul class="history-list" id="history-list"></ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- State & DOM Elements ---
+    const canvas = document.getElementById('wheel');
+    const ctx = canvas.getContext('2d');
+    const spinBtn = document.getElementById('spin-btn');
+    const itemsInput = document.getElementById('items-input');
+    const resultDisplay = document.getElementById('result-display');
+    const powerSlider = document.getElementById('power-slider');
+    const frictionSlider = document.getElementById('friction-slider');
+    const soundToggle = document.getElementById('sound-toggle');
+    const historyToggle = document.getElementById('history-toggle');
+    const historyList = document.getElementById('history-list');
+    const themeToggle = document.getElementById('theme-toggle');
+    const clearHistoryBtn = document.getElementById('clear-history');
+
+    let items = [];
+    let currentAngle = 0;
+    let angularVelocity = 0;
+    let isSpinning = false;
+    let lastTickSegment = -1;
+    let animationFrame;
+
+    // --- Audio Context Synthesis (No external files needed) ---
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx;
+
+    function initAudio() {
+        if (!audioCtx && soundToggle.checked) {
+            audioCtx = new AudioContext();
+        }
+    }
+
+    function playTick() {
+        if (!soundToggle.checked) return;
+        initAudio();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.03);
+        
+        // Intensity depends on speed
+        let vol = Math.min(0.5, angularVelocity * 2);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.03);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.03);
+    }
+
+    function playWinSound() {
+        if (!soundToggle.checked) return;
+        initAudio();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(600, audioCtx.currentTime + 0.1);
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime + 0.2);
+        
+        gain.gain.setValueAtTime(0, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 1);
+    }
+
+    // --- Drawing the Wheel ---
+    function updateItems() {
+        items = itemsInput.value.split('\n').filter(i => i.trim() !== '');
+        if(items.length === 0) items = ['Add Items'];
+        drawWheel();
+    }
+
+    function getSegmentColor(index, total) {
+        // Premium looking HSL colors
+        const hue = (index * (360 / total)) % 360;
+        return `hsl(${hue}, 70%, 60%)`;
+    }
+
+    function drawWheel() {
+        const width = canvas.width;
+        const height = canvas.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const radius = width / 2;
+        const arcLength = (2 * Math.PI) / items.length;
+
+        ctx.clearRect(0, 0, width, height);
+
+        // Normalize angle to avoid rendering glitches
+        currentAngle = currentAngle % (2 * Math.PI);
+
+        for (let i = 0; i < items.length; i++) {
+            const startAngle = currentAngle + i * arcLength;
+            const endAngle = startAngle + arcLength;
+
+            // Draw Segment
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+            ctx.fillStyle = getSegmentColor(i, items.length);
+            ctx.fill();
+            
+            // Segment Border
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--surface').trim();
+            ctx.stroke();
+
+            // Draw Text
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(startAngle + arcLength / 2);
+            ctx.textAlign = "right";
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 32px sans-serif";
+            ctx.shadowColor = "rgba(0,0,0,0.5)";
+            ctx.shadowBlur = 4;
+            // Shorten text if too long
+            let text = items[i];
+            if(text.length > 15) text = text.substring(0, 15) + '...';
+            ctx.fillText(text, radius - 30, 10);
+            ctx.restore();
+        }
+    }
+
+    // --- Physics & Animation ---
+    function getWinnerIndex() {
+        // The pointer is at the top (which is -PI/2 relative to standard canvas 0 angle)
+        // We need to calculate which segment falls under the 270 degree (-90 deg) mark.
+        const arcLength = (2 * Math.PI) / items.length;
+        
+        // Offset by PI/2 because pointer is at top
+        let pointerAngle = (3 * Math.PI / 2) - currentAngle;
+        
+        // Normalize
+        pointerAngle = ((pointerAngle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+        
+        const index = Math.floor(pointerAngle / arcLength);
+        return index;
+    }
+
+    function animate() {
+        if (angularVelocity > 0) {
+            currentAngle += angularVelocity;
+            
+            // Friction logic
+            let friction = parseFloat(frictionSlider.value);
+            angularVelocity *= friction;
+
+            // Tick logic
+            const currentSegment = getWinnerIndex();
+            if (currentSegment !== lastTickSegment) {
+                playTick();
+                lastTickSegment = currentSegment;
+            }
+
+            // Stop threshold
+            if (angularVelocity < 0.001) {
+                angularVelocity = 0;
+                isSpinning = false;
+                spinBtn.disabled = false;
+                spinBtn.style.opacity = "1";
+                declareWinner();
+            } else {
+                animationFrame = requestAnimationFrame(animate);
+            }
+        }
+        drawWheel();
+    }
+
+    function declareWinner() {
+        const winnerIndex = getWinnerIndex();
+        const winnerText = items[winnerIndex];
+        resultDisplay.innerText = `🎉 ${winnerText} 🎉`;
+        playWinSound();
+
+        if (historyToggle.checked) {
+            const li = document.createElement('li');
+            li.innerText = winnerText;
+            historyList.prepend(li); // Add to top
+        }
+    }
+
+    function spin() {
+        if (isSpinning) return;
+        if (items.length <= 1) {
+            alert("Please add at least 2 items to spin!");
+            return;
+        }
+
+        initAudio();
+        isSpinning = true;
+        spinBtn.disabled = true;
+        spinBtn.style.opacity = "0.5";
+        resultDisplay.innerText = "Spinning...";
+
+        // Add some randomness to starting power
+        const basePower = parseFloat(powerSlider.value);
+        const randomBoost = Math.random() * 0.1;
+        angularVelocity = basePower + randomBoost;
+
+        lastTickSegment = getWinnerIndex();
+        cancelAnimationFrame(animationFrame);
+        animate();
+    }
+
+    // --- Event Listeners ---
+    spinBtn.addEventListener('click', spin);
+    itemsInput.addEventListener('input', updateItems);
+    
+    themeToggle.addEventListener('click', () => {
+        const html = document.documentElement;
+        if (html.getAttribute('data-theme') === 'dark') {
+            html.setAttribute('data-theme', 'light');
+        } else {
+            html.setAttribute('data-theme', 'dark');
+        }
+        drawWheel(); // Redraw to update border colors
+    });
+
+    clearHistoryBtn.addEventListener('click', () => {
+        historyList.innerHTML = '';
+    });
+
+    // Initialize
+    updateItems();
+</script>
+
+</body>
+</html>
