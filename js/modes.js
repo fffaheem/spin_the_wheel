@@ -391,6 +391,12 @@ function updateScoreboard() {
     if (nwinDisp)   nwinDisp.textContent   = nWinTotal;
     if (ntowinDisp) ntowinDisp.textContent = nToWinTarget;
 
+    // Update in-game configuration label based on knockoutEnabled
+    var ntowinLabel = document.getElementById('ntowin-label');
+    if (ntowinLabel) {
+        ntowinLabel.textContent = knockoutEnabled ? 'Wins to eliminate' : 'Wins to win';
+    }
+
     // Update scoreboard title
     var sbTitle = document.getElementById('scoreboard-title');
     if (sbTitle) {

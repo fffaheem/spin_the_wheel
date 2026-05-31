@@ -227,8 +227,8 @@ nwinPlusBtn.addEventListener('click', function() {
 
 // ---- In-game N to Win config (Task #5) ----
 ntowinMinusBtn.addEventListener('click', function() {
-    // Min = 2
-    nToWinTarget = Math.max(2, nToWinTarget - 1);
+    var minSpins = items.length + 1;
+    nToWinTarget = Math.max(minSpins, nToWinTarget - 1);
     if (ntowinDisplay) ntowinDisplay.textContent = nToWinTarget;
     updateModeBadge();
     updateScoreboard();
