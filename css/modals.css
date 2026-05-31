@@ -1,0 +1,547 @@
+/* ============================================================
+   MODALS — Mode Picker Overlay, Celebration Modal, Toasts
+   ============================================================ */
+
+/* ================================================================
+   MODE PICKER OVERLAY
+   ================================================================ */
+
+.mode-picker-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 5000;
+    display: flex;
+    align-items: flex-start;       /* allow scroll on short screens */
+    justify-content: center;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 24px 16px 36px;
+}
+
+/* On taller screens, center vertically */
+@media (min-height: 600px) {
+    .mode-picker-overlay {
+        align-items: center;
+        padding: 20px 16px;
+    }
+}
+
+.mode-picker-inner {
+    width: 100%;
+    max-width: 460px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* ---- Header ---- */
+.mode-picker-header {
+    text-align: center;
+    padding-bottom: 2px;
+}
+
+.mode-picker-logo {
+    font-size: 3.2rem;
+    display: inline-block;
+    animation: floatEmoji 3.2s ease-in-out infinite;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.mode-picker-header h1 {
+    margin-bottom: 5px;
+    background: linear-gradient(135deg, var(--text), var(--primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+}
+
+.mode-picker-header p {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+/* ---- Mode Cards — 3 columns default, 1 column tiny ---- */
+.mode-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+/* Very narrow: stack vertically */
+@media (max-width: 320px) {
+    .mode-cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+.mode-card {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 10px 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color var(--transition), transform var(--spring),
+                box-shadow var(--transition), background var(--transition);
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+    /* ensure tap-size on mobile */
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mode-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--primary-glow2), transparent);
+    opacity: 0;
+    transition: opacity var(--transition);
+    pointer-events: none;
+}
+
+.mode-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px var(--primary-glow);
+}
+
+.mode-card:hover::before { opacity: 1; }
+
+.mode-card:active { transform: scale(0.97); }
+
+.mode-card.selected {
+    border-color: var(--primary);
+    box-shadow: 0 8px 24px var(--primary-glow);
+    transform: translateY(-2px);
+}
+
+.mode-card.selected::before { opacity: 1; }
+
+.mode-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 7px;
+    right: 9px;
+    font-size: 0.66rem;
+    font-weight: 900;
+    color: var(--primary);
+    background: var(--primary-glow2);
+    border: 1px solid var(--primary-glow);
+    border-radius: 7px;
+    padding: 1px 5px;
+    line-height: 1.5;
+}
+
+.mode-icon {
+    font-size: 1.75rem;
+    margin-bottom: 7px;
+    display: block;
+}
+
+.mode-name {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 3px;
+    letter-spacing: -0.01em;
+}
+
+.mode-desc {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+}
+
+/* Short screen: compact card */
+@media (max-height: 580px) {
+    .mode-picker-logo  { font-size: 2.2rem; margin-bottom: 4px; }
+    .mode-picker-inner { gap: 10px; }
+    .mode-card         { padding: 12px 8px 10px; }
+    .mode-icon         { font-size: 1.4rem; margin-bottom: 4px; }
+    .mode-desc         { display: none; }   /* hide description on tiny screens */
+}
+
+/* ---- N Mode Config ---- */
+/* (N Win / N to Win config is now in-game — see settings.css .n-config-row) */
+
+.knockout-toggle-row {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    transition: border-color var(--transition), background var(--transition);
+}
+
+.knockout-toggle-row:has(input:checked) {
+    border-color: rgba(239, 68, 68, 0.6);
+    background: rgba(239, 68, 68, 0.04);
+}
+
+.ko-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.ko-icon {
+    font-size: 1.2rem;
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg,
+        rgba(239, 68, 68, 0.14),
+        rgba(249, 115, 22, 0.08));
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.ko-title {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 2px;
+    white-space: nowrap;
+}
+
+.ko-desc {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* ---- Start Playing Button ---- */
+#start-game-btn {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    padding: 16px;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    width: 100%;
+    box-shadow: 0 8px 26px var(--primary-glow), 0 2px 8px rgba(0,0,0,0.2);
+    transition: transform var(--spring), box-shadow var(--transition);
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#start-game-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 55%);
+    pointer-events: none;
+}
+
+#start-game-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 38px var(--primary-glow), 0 4px 14px rgba(0,0,0,0.25);
+}
+
+#start-game-btn:active {
+    transform: scale(0.98);
+    box-shadow: 0 4px 14px var(--primary-glow);
+}
+
+
+/* ================================================================
+   CELEBRATION MODAL
+   ================================================================ */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 8, 20, 0.88);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+    animation: backdropIn 0.3s ease-out;
+    overflow-y: auto;
+}
+
+.modal-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 26px;
+    padding: 36px 28px 28px;
+    max-width: 340px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.65),
+                0 0 0 1px rgba(255,255,255,0.04);
+    animation: modalCardIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+/* Top shimmer bar */
+.modal-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899, #6366f1);
+    background-size: 200% 100%;
+    animation: shimmerBar 2.5s linear infinite;
+}
+
+.modal-emoji {
+    font-size: 4.8rem;
+    line-height: 1;
+    margin-bottom: 12px;
+    display: inline-block;
+    animation: floatEmoji 2.8s ease-in-out infinite;
+}
+
+.modal-subtitle {
+    font-size: 0.68rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.24em;
+    color: var(--primary);
+    margin-bottom: 8px;
+}
+
+.modal-title {
+    font-size: clamp(1.5rem, 6vw, 2rem);
+    font-weight: 900;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    word-break: break-word;
+    margin-bottom: 22px;
+    background: linear-gradient(135deg, var(--text) 0%, var(--primary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Modal action buttons row */
+.modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#modal-close-btn {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    font-size: 0.93rem;
+    font-weight: 800;
+    padding: 13px 24px;
+    border-radius: var(--radius-sm);
+    width: 100%;
+    box-shadow: 0 4px 16px var(--primary-glow);
+    transition: transform var(--spring), box-shadow var(--transition);
+    letter-spacing: 0.04em;
+}
+
+#modal-close-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 26px var(--primary-glow);
+}
+
+#modal-close-btn:active { transform: scale(0.97); }
+
+/* "Back to Menu" link inside modal */
+#modal-menu-btn {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 10px 24px;
+    border-radius: var(--radius-sm);
+    width: 100%;
+    transition: all var(--transition);
+    letter-spacing: 0.02em;
+}
+
+#modal-menu-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-glow2);
+}
+
+/* Short viewport: compact modal */
+@media (max-height: 580px) {
+    .modal-card        { padding: 24px 22px 20px; border-radius: 20px; }
+    .modal-emoji       { font-size: 3rem; margin-bottom: 8px; }
+    .modal-title       { margin-bottom: 16px; }
+}
+
+
+/* ================================================================
+   CONFIRM MODAL
+   ================================================================ */
+
+.confirm-card {
+    max-width: 320px;
+    padding: 36px 28px 28px;
+}
+
+.confirm-icon {
+    font-size: 3rem;
+    line-height: 1;
+    margin-bottom: 14px;
+    display: block;
+    text-align: center;
+}
+
+.confirm-title {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--text);
+    text-align: center;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+}
+
+.confirm-message {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.55;
+    margin-bottom: 24px;
+}
+
+.confirm-yes {
+    background: linear-gradient(135deg, var(--danger), #dc2626);
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 800;
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    width: 100%;
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+    transition: transform var(--spring), box-shadow var(--transition);
+    letter-spacing: 0.02em;
+}
+
+.confirm-yes:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(239, 68, 68, 0.45);
+}
+
+.confirm-yes:active { transform: scale(0.97); }
+
+.confirm-no {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    font-weight: 700;
+    padding: 11px 20px;
+    border-radius: var(--radius-sm);
+    width: 100%;
+    transition: all var(--transition);
+}
+
+.confirm-no:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-glow2);
+}
+
+/* ================================================================
+   KNOCKOUT TOAST
+   ================================================================ */
+
+.knockout-toast {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%) translateY(calc(-100% - 24px));
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    padding: 11px 16px;
+    border-radius: 18px;
+    box-shadow: var(--shadow-lg);
+    z-index: 9500;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    transition: transform 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+    width: min(330px, calc(100vw - 28px));
+    pointer-events: none;
+}
+
+.knockout-toast.show {
+    transform: translateX(-50%) translateY(0);
+}
+
+.toast-icon {
+    font-size: 1.15rem;
+    width: 34px;
+    height: 34px;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.toast-body { flex: 1; min-width: 0; }
+
+.toast-title {
+    font-weight: 800;
+    font-size: 0.82rem;
+    color: var(--text);
+    margin-bottom: 1px;
+}
+
+.toast-desc {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ---- Score Toast (N modes) ---- */
+.score-toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(50px);
+    opacity: 0;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    padding: 9px 16px;
+    border-radius: 18px;
+    box-shadow: var(--shadow-lg);
+    z-index: 9500;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text);
+    transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+    max-width: calc(100vw - 28px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.score-toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}

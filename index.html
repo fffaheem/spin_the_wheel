@@ -1,142 +1,285 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-        <title>Spin Wheel</title>
-    
-        <!-- Theme -->
-        <meta name="theme-color" content="#0f172a">
-    
-        <!-- PWA -->
-        <meta name="mobile-web-app-capable" content="yes">
-    
-        <!-- Apple -->
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <meta name="apple-mobile-web-app-title" content="Spin Wheel">
-    
-        <!-- Manifest -->
-        <link rel="manifest" href="./manifest.webmanifest">
-    
-        <!-- Favicons -->
-        <link
-            rel="icon"
-            type="image/png"
-            sizes="192x192"
-            href="./icon-192.png"
-        >
-    
-        <link
-            rel="apple-touch-icon"
-            sizes="180x180"
-            href="./apple-touch-icon.png"
-        >
-    
-        <!-- Styles -->
-        <link rel="stylesheet" href="./style.css">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Spin &amp; Win</title>
+    <meta name="description" content="A premium spin-the-wheel game with Classic, N Win, and N to Win modes — with optional Knockout elimination.">
+
+    <meta name="theme-color" content="#080c18">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Spin &amp; Win">
+
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+
+    <link rel="stylesheet" href="./css/base.css">
+    <link rel="stylesheet" href="./css/layout.css">
+    <link rel="stylesheet" href="./css/wheel.css">
+    <link rel="stylesheet" href="./css/settings.css">
+    <link rel="stylesheet" href="./css/modals.css">
+    <link rel="stylesheet" href="./css/animations.css">
+</head>
 <body>
 
-<div class="container">
-    <div class="wheel-section">
-        <div class="header-controls">
-            <h1 style="font-size: 1.5rem;"> <a href="./index.html" style="text-decoration: none; color: inherit;">Spin &amp; Win </a> </h1>
-            <button class="icon-btn" id="theme-toggle" title="Toggle Theme">🌓</button>
+<!-- ================================================================
+     MODE PICKER OVERLAY
+     (Only shown on first visit or when user explicitly clicks Menu)
+     ================================================================ -->
+<div id="mode-picker" class="mode-picker-overlay" style="display:none;">
+    <div class="mode-picker-inner">
+
+        <div class="mode-picker-header">
+            <div class="mode-picker-logo">🎡</div>
+            <h1>Spin &amp; Win</h1>
+            <p>Choose your game mode to begin</p>
         </div>
-        
-        <div class="wheel-container">
-            <div class="pointer"></div>
-            <canvas id="wheel" width="600" height="600"></canvas>
+
+        <div class="mode-cards">
+            <div class="mode-card selected" data-mode="classic" id="card-classic"
+                 role="button" tabindex="0" aria-label="Classic mode">
+                <span class="mode-icon">🎯</span>
+                <div class="mode-name">Classic</div>
+                <div class="mode-desc">Spin once — instant winner</div>
+            </div>
+
+            <div class="mode-card" data-mode="nwin" id="card-nwin"
+                 role="button" tabindex="0" aria-label="N Win mode">
+                <span class="mode-icon">🏅</span>
+                <div class="mode-name">N Win</div>
+                <div class="mode-desc" id="desc-nwin">Most wins win the game</div>
+            </div>
+
+            <div class="mode-card" data-mode="ntowin" id="card-ntowin"
+                 role="button" tabindex="0" aria-label="N to Win mode">
+                <span class="mode-icon">🎖️</span>
+                <div class="mode-name">N to Win</div>
+                <div class="mode-desc" id="desc-ntowin">First to N wins</div>
+            </div>
         </div>
-        
-        <div id="result-display">Ready to spin!</div>
-        <div id="knockout-status" style="display: none; font-size: 0.95rem; color: var(--text-muted); margin-bottom: 15px; font-weight: 500;">
-            Remaining: <span id="knockout-count" style="color: var(--primary); font-weight: bold;">0/0</span> items
-            &nbsp;•&nbsp; 
-            <a href="#" id="knockout-reset-btn" style="color: var(--primary); text-decoration: none; border-bottom: 1px dashed var(--primary); transition: opacity 0.2s;">Restart Knockout</a>
+
+        <!-- Knockout toggle -->
+        <div class="knockout-toggle-row">
+            <div class="ko-info">
+                <div class="ko-icon">⚡</div>
+                <div>
+                    <div class="ko-title">Knockout Mode</div>
+                    <div class="ko-desc">Eliminate losers each round</div>
+                </div>
+            </div>
+            <label class="switch" aria-label="Knockout mode toggle">
+                <input type="checkbox" id="knockout-toggle">
+                <span class="slider"></span>
+            </label>
         </div>
-        
-        <button id="spin-btn">SPIN THE WHEEL</button>
+
+        <button id="start-game-btn">Start Playing →</button>
+
+    </div>
+</div>
+
+
+<!-- ================================================================
+     MAIN APP
+     ================================================================ -->
+<div id="app" style="display:none;">
+
+    <div class="mode-status-bar">
+        <div class="mode-badge" id="mode-badge">🎯 Classic</div>
+        <div class="header-right">
+            <button class="icon-btn" id="theme-toggle" title="Toggle Theme" aria-label="Toggle light/dark theme">🌓</button>
+            <button class="change-mode-btn" id="change-mode-btn" aria-label="Back to main menu">Menu</button>
+        </div>
     </div>
 
-    <div class="controls-section">
-        <div class="card">
-            <h2>Items</h2>
-            <textarea id="items-input"></textarea>
+    <div class="main-layout">
+
+        <!-- ===================== WHEEL SECTION ===================== -->
+        <div class="wheel-section">
+
+            <div class="wheel-container">
+                <div class="pointer" aria-hidden="true"></div>
+                <canvas id="wheel" width="600" height="600" role="img" aria-label="Spin wheel"></canvas>
+            </div>
+
+            <div id="result-display" aria-live="polite">Ready to spin!</div>
+
+            <div id="knockout-status" role="status" aria-live="polite">
+                <span id="knockout-count-wrapper">Remaining:&nbsp;<span id="knockout-count">0/0</span>&nbsp;·&nbsp;</span>
+                <a href="#" id="knockout-reset-btn" aria-label="Restart session">Restart</a>
+            </div>
+
+            <button id="spin-btn">SPIN THE WHEEL</button>
         </div>
 
-        <div class="card">
-            <h2>Settings</h2>
-            <div class="setting-group" style="justify-content: flex-start; gap: 15px;">
-                <label class="setting-label">Color Theme</label>
-                <select id="color-theme-select">
-                    <option value="classic">Classic Vibrant</option>
-                    <option value="pastel">Pastel Dream</option>
-                    <option value="neon">Cyberpunk Neon</option>
-                    <option value="gold">Royal Gold</option>
-                    <option value="ocean">Deep Ocean</option>
-                    <option value="retro">Retro Pop</option>
-                    <option value="sunset">Sunset Mirage</option>
-                    <option value="crimson">Crimson Velvet</option>
-                    <option value="lavender">Lavender Haze</option>
-                    <option value="matcha">Matcha & Wood</option>
-                </select>
-            </div>
-            <div class="setting-group">
-                <div class="setting-label">Speed <span class="val-badge" id="power-val">50</span></div>
-                <input type="range" id="power-slider" min="1" max="100" step="1" value="50">
-            </div>
-            <div class="setting-group">
-                <div class="setting-label">Duration <span class="val-badge" id="friction-val">65</span></div>
-                <input type="range" id="friction-slider" min="1" max="100" step="1" value="65">
-            </div>
-            <div class="setting-group">
-                <label class="setting-label">Sound Effects</label>
-                <label class="switch">
-                    <input type="checkbox" id="sound-toggle" checked>
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="setting-group">
-                <label class="setting-label">Keep History</label>
-                <label class="switch">
-                    <input type="checkbox" id="history-toggle" checked>
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="setting-group">
-                <label class="setting-label">Knockout Mode</label>
-                <label class="switch">
-                    <input type="checkbox" id="knockout-toggle">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <button id="reset-btn" class="btn-outline">Reset to Defaults</button>
-        </div>
 
-        <div class="card">
-            <div class="setting-group" style="margin-bottom: 0;">
-                <h2 style="margin: 0;">Results History</h2>
-                <button class="icon-btn" id="clear-history" style="width:30px;height:30px;font-size:0.8rem;" title="Clear">🗑️</button>
+        <!-- ===================== CONTROLS SECTION ===================== -->
+        <div class="controls-section">
+
+            <!-- Scoreboard + In-game config (N Win / N to Win only) -->
+            <div class="card" id="scoreboard-card" style="display:none;" aria-live="polite">
+
+                <!-- N Win in-game config -->
+                <div id="nwin-config-row" class="n-config-row" style="display:none;">
+                    <div class="n-config-left">
+                        <span class="n-config-label">Spins per round</span>
+                        <span class="n-config-hint" id="nwin-hint">min 3</span>
+                    </div>
+                    <div class="n-config-picker">
+                        <button class="n-picker-btn" id="nwin-minus" aria-label="Decrease spins">−</button>
+                        <span class="n-picker-val" id="nwin-display">4</span>
+                        <button class="n-picker-btn" id="nwin-plus" aria-label="Increase spins">+</button>
+                    </div>
+                </div>
+
+                <!-- N to Win in-game config -->
+                <div id="ntowin-config-row" class="n-config-row" style="display:none;">
+                    <div class="n-config-left">
+                        <span class="n-config-label" id="ntowin-label">Wins to eliminate</span>
+                        <span class="n-config-hint">min 2</span>
+                    </div>
+                    <div class="n-config-picker">
+                        <button class="n-picker-btn" id="ntowin-minus" aria-label="Decrease target">−</button>
+                        <span class="n-picker-val" id="ntowin-display">2</span>
+                        <button class="n-picker-btn" id="ntowin-plus" aria-label="Increase target">+</button>
+                    </div>
+                </div>
+
+                <h2 id="scoreboard-title">Scoreboard</h2>
+                <div class="scoreboard" id="scoreboard"></div>
+                <div class="spins-remaining" id="spins-remaining" style="display:none;"></div>
             </div>
-            <ul class="history-list" id="history-list" style="margin-top: 10px;"></ul>
+
+            <!-- Items -->
+            <div class="card">
+                <h2>Items</h2>
+                <textarea id="items-input"
+                    placeholder="Enter items, one per line…"
+                    aria-label="Wheel items, one per line"></textarea>
+            </div>
+
+            <!-- Settings -->
+            <div class="card">
+                <h2>Settings</h2>
+
+                <div class="setting-group" style="justify-content:flex-start; gap:10px;">
+                    <label class="setting-label" for="color-theme-select">Color Theme</label>
+                    <select id="color-theme-select" aria-label="Wheel color theme">
+                        <option value="classic">Classic Vibrant</option>
+                        <option value="pastel">Pastel Dream</option>
+                        <option value="neon">Cyberpunk Neon</option>
+                        <option value="gold">Royal Gold</option>
+                        <option value="ocean">Deep Ocean</option>
+                        <option value="retro">Retro Pop</option>
+                        <option value="sunset">Sunset Mirage</option>
+                        <option value="crimson">Crimson Velvet</option>
+                        <option value="lavender">Lavender Haze</option>
+                        <option value="matcha">Matcha &amp; Wood</option>
+                    </select>
+                </div>
+
+                <div class="setting-group">
+                    <label class="setting-label" for="power-slider">
+                        Speed <span class="val-badge" id="power-val">50</span>
+                    </label>
+                    <input type="range" id="power-slider" min="1" max="100" step="1" value="50"
+                           aria-label="Spin speed">
+                </div>
+
+                <div class="setting-group">
+                    <label class="setting-label" for="friction-slider">
+                        Duration <span class="val-badge" id="friction-val">65</span>
+                    </label>
+                    <input type="range" id="friction-slider" min="1" max="100" step="1" value="65"
+                           aria-label="Spin duration">
+                </div>
+
+                <div class="setting-group">
+                    <label class="setting-label" for="sound-toggle">Sound Effects</label>
+                    <label class="switch">
+                        <input type="checkbox" id="sound-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-group">
+                    <label class="setting-label" for="history-toggle">Keep History</label>
+                    <label class="switch">
+                        <input type="checkbox" id="history-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <button id="reset-btn" class="btn-outline" aria-label="Reset all settings to defaults">
+                    Reset to Defaults
+                </button>
+            </div>
+
+            <!-- History -->
+            <div class="card">
+                <h2>
+                    History
+                    <button class="icon-btn" id="clear-history"
+                            title="Clear history" aria-label="Clear history">🗑️</button>
+                </h2>
+                <ul class="history-list" id="history-list" aria-label="Spin history"></ul>
+            </div>
+
         </div>
     </div>
 </div>
 
-<!-- Celebration Overlay Modal -->
-<div id="celebration-modal" class="modal-overlay" style="display: none;">
+
+<!-- ================================================================
+     CELEBRATION MODAL
+     ================================================================ -->
+<div id="celebration-modal" class="modal-overlay" style="display:none;"
+     role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="modal-card">
-        <div class="modal-emoji">🏆</div>
-        <div class="modal-subtitle" id="modal-subtitle">Winner</div>
+        <div class="modal-emoji" aria-hidden="true">🎉</div>
+        <div class="modal-subtitle" id="modal-subtitle">Winner!</div>
         <div class="modal-title" id="modal-title">Prize Name</div>
-        <button id="modal-close-btn">Awesome!</button>
+        <div class="modal-actions">
+            <button id="modal-close-btn" autofocus>🔄 Restart</button>
+            <button id="modal-menu-btn">← Back to Menu</button>
+        </div>
     </div>
 </div>
 
-<script src="./script.js"></script>
+
+<!-- ================================================================
+     CONFIRM MODAL (replaces browser confirm() dialogs)
+     ================================================================ -->
+<div id="confirm-modal" class="modal-overlay" style="display:none;"
+     role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+    <div class="modal-card confirm-card">
+        <div class="confirm-icon" aria-hidden="true">⚠️</div>
+        <div class="confirm-title" id="confirm-title">Return to Menu?</div>
+        <div class="confirm-message" id="confirm-message">Your current game progress will be lost.</div>
+        <div class="modal-actions">
+            <button id="confirm-yes-btn" class="confirm-yes">Go to Menu</button>
+            <button id="confirm-no-btn" class="confirm-no">Keep Playing</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- Scripts -->
+<script src="./js/config.js"></script>
+<script src="./js/state.js"></script>
+<script src="./js/audio.js"></script>
+<script src="./js/wheel.js"></script>
+<script src="./js/knockout.js"></script>
+<script src="./js/confetti.js"></script>
+<script src="./js/notifications.js"></script>
+<script src="./js/storage.js"></script>
+<script src="./js/modes.js"></script>
+<script src="./js/physics.js"></script>
+<script src="./js/main.js"></script>
 
 </body>
 </html>

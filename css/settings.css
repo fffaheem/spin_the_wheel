@@ -1,0 +1,417 @@
+/* ============================================================
+   SETTINGS — Cards, Inputs, Toggles, Scoreboard, History
+   ============================================================ */
+
+/* ---- Card ---- */
+.card {
+    background: var(--surface);
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    transition: background var(--transition), border-color var(--transition);
+}
+
+@media (min-width: 700px) {
+    .card { padding: 16px 18px; }
+}
+
+@media (max-width: 374px) {
+    .card { padding: 12px 13px; border-radius: var(--radius-sm); }
+}
+
+.card h2 {
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* ---- Textarea ---- */
+textarea {
+    width: 100%;
+    height: 108px;
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    resize: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow2);
+}
+
+textarea::placeholder { color: var(--text-faint); }
+
+/* ---- Setting Group ---- */
+.setting-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 13px;
+    flex-wrap: wrap;
+}
+
+.setting-group:last-child { margin-bottom: 0; }
+
+.setting-label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* ---- Value Badge ---- */
+.val-badge {
+    background: var(--primary-glow2);
+    color: var(--primary);
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--primary-glow);
+    min-width: 30px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---- Range Input ---- */
+input[type="range"] {
+    flex: 1 1 140px;
+    width: 100%;
+    accent-color: var(--primary);
+    cursor: pointer;
+    height: 4px;
+    border-radius: 4px;
+}
+
+/* ---- Select ---- */
+select {
+    flex: 1;
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1.5px solid var(--border);
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: border-color var(--transition);
+    min-width: 0;
+}
+
+select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow2);
+}
+
+/* ---- Toggle Switch ---- */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: var(--border);
+    border-radius: 24px;
+    transition: background 0.28s;
+}
+
+.slider::before {
+    content: "";
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    transition: transform var(--spring);
+}
+
+input:checked + .slider { background: var(--primary); }
+input:checked + .slider::before { transform: translateX(18px); }
+
+/* ---- Buttons ---- */
+.btn-outline {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1.5px solid var(--border);
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    width: 100%;
+    margin-top: 10px;
+    transition: all var(--transition);
+}
+
+.btn-outline:hover {
+    background: var(--surface-2);
+    border-color: var(--text-faint);
+    color: var(--text);
+}
+
+.icon-btn {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--text-muted);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all var(--transition);
+}
+
+.icon-btn:hover {
+    background: var(--surface-2);
+    border-color: var(--text-faint);
+    color: var(--text);
+}
+
+/* ---- History List ---- */
+.history-list {
+    list-style: none;
+    max-height: 168px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.history-list:empty::after {
+    content: 'No results yet';
+    display: block;
+    text-align: center;
+    padding: 20px;
+    font-size: 0.82rem;
+    color: var(--text-faint);
+}
+
+.history-list li {
+    padding: 7px 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    animation: fadeSlideDown 0.22s ease-out;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.history-list li:last-child { border-bottom: none; }
+
+/* ---- Scoreboard ---- */
+.scoreboard {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.score-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition);
+}
+
+.score-row.leading {
+    border-color: var(--primary);
+    background: var(--primary-glow2);
+}
+
+.score-row.eliminated {
+    opacity: 0.38;
+}
+
+.score-row.eliminated .score-name {
+    text-decoration: line-through;
+    color: var(--text-faint);
+}
+
+.score-rank {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--text-faint);
+    min-width: 18px;
+    text-align: center;
+}
+
+.score-row.leading .score-rank {
+    color: var(--gold);
+}
+
+.score-name {
+    flex: 1;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.score-bar-wrap {
+    flex: 2;
+    height: 5px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    min-width: 40px;
+}
+
+.score-bar {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 4px;
+    transition: width 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+    min-width: 2px;
+}
+
+.score-row.leading .score-bar {
+    background: linear-gradient(90deg, var(--primary), #a78bfa);
+}
+
+.score-count {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--primary);
+    min-width: 24px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.spins-remaining {
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 12px;
+    font-weight: 600;
+    padding: 8px 12px;
+    background: var(--surface-2);
+    border-radius: var(--radius-sm);
+}
+
+.spins-remaining strong {
+    color: var(--primary);
+    font-size: 1.15rem;
+    font-weight: 900;
+}
+
+/* ---- At-risk row (knockout mode — leader will be eliminated) ---- */
+.score-row.at-risk {
+    border-color: rgba(239, 68, 68, 0.6);
+    background: rgba(239, 68, 68, 0.06);
+}
+
+.score-row.at-risk .score-rank { color: var(--danger); }
+.score-row.at-risk .score-bar  { background: linear-gradient(90deg, var(--danger), #f97316); }
+.score-row.at-risk .score-count { color: var(--danger); }
+
+/* ================================================================
+   IN-GAME N CONFIG ROW (inside scoreboard card)
+   ================================================================ */
+
+.n-config-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 14px;
+    transition: border-color var(--transition);
+    animation: fadeSlideDown 0.25s ease-out;
+}
+
+.n-config-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.n-config-label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.n-config-hint {
+    font-size: 0.7rem;
+    color: var(--text-faint);
+    font-weight: 500;
+}
+
+.n-config-picker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.n-picker-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-xs);
+    background: var(--surface-3);
+    border: 1.5px solid var(--border);
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+    line-height: 1;
+}
+
+.n-picker-btn:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.n-picker-btn:active { transform: scale(0.88); }
+
+.n-picker-val {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--primary);
+    min-width: 38px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
